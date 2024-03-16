@@ -35,12 +35,7 @@ contract CounterTest is Test, Deployers {
         Deployers.deployMintAndApprove2Currencies();
 
         // Deploy the hook to an address with the correct flags
-        uint160 flags = uint160(
-            Hooks.BEFORE_SWAP_FLAG |
-                Hooks.AFTER_SWAP_FLAG |
-                Hooks.BEFORE_ADD_LIQUIDITY_FLAG |
-                Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
-        );
+        uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG);
         (address hookAddress, bytes32 salt) = HookMiner.find(
             address(this),
             flags,
@@ -82,11 +77,6 @@ contract CounterTest is Test, Deployers {
 
     function testCounterHooks() public {
         // positions were created in setup()
-        /* assertEq(counter.beforeAddLiquidityCount(poolId), 3);
-        assertEq(counter.beforeRemoveLiquidityCount(poolId), 0);
-
-        assertEq(counter.beforeSwapCount(poolId), 0);
-        assertEq(counter.afterSwapCount(poolId), 0); */
 
         uint256 blockNumber = block.number;
         uint256 nonce = 0;
@@ -118,16 +108,9 @@ contract CounterTest is Test, Deployers {
         // ------------------- //
 
         assertEq(int256(swapDelta.amount0()), amountSpecified);
-
-        /*  assertEq(counter.beforeSwapCount(poolId), 1);
-        assertEq(counter.afterSwapCount(poolId), 1); */
     }
 
     function testLiquidityHooks() public {
-        // positions were created in setup()
-        /* assertEq(counter.beforeAddLiquidityCount(poolId), 3);
-        assertEq(counter.beforeRemoveLiquidityCount(poolId), 0); */
-
         // remove liquidity
         int256 liquidityDelta = -1e18;
         modifyLiquidityRouter.modifyLiquidity(
@@ -135,8 +118,5 @@ contract CounterTest is Test, Deployers {
             IPoolManager.ModifyLiquidityParams(-60, 60, liquidityDelta),
             ZERO_BYTES
         );
-
-        /* assertEq(counter.beforeAddLiquidityCount(poolId), 3);
-        assertEq(counter.beforeRemoveLiquidityCount(poolId), 1); */
     }
 }
