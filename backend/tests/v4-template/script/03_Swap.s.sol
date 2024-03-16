@@ -17,11 +17,11 @@ contract SwapScript is Script {
         PoolSwapTest(0x60AbEb98b3b95A0c5786261c1Ab830e3D2383F9e); // swap test base sep
 
     address constant MUNI_ADDRESS =
-        address(0x56ba6046cc51b859DAA4Eb6D445DE99C5b1E4391); //-- insert your own contract address here -- mUNI deployed to GOERLI
+        address(0x19544eafF5959f228D2d76dF1570B220121518A8); //-- insert your own contract address here -- mUNI deployed to GOERLI
     address constant MUSDC_ADDRESS =
-        address(0x06B2B98dB45481dd0878Bb07979Ba0A79b60A49e); //-- insert your own contract address here -- mUSDC deployed to GOERLI
+        address(0x0844B1EC6ee5E2F575Aa55724057721b9cd30e80); //-- insert your own contract address here -- mUSDC deployed to GOERLI
     address constant HOOK_ADDRESS =
-        address(0x020A5bE4a8BCbd885fEC6122e3beE4e8F3Baaaa2); // address of the hook contract deployed to goerli -- you can use this hook address or deploy your own!
+        address(0x020664b9f354c415a7D01dAa483CF78aFe02F66E); // address of the hook contract deployed to goerli -- you can use this hook address or deploy your own!
 
     // slippage tolerance to allow for unlimited price impact
     uint160 public constant MIN_PRICE_LIMIT = TickMath.MIN_SQRT_RATIO + 1;
@@ -74,8 +74,9 @@ contract SwapScript is Script {
             });
 
         // from msg.sender initialize a swap
-        uint256 blockNumber = block.number + 5;
-        uint256 nonce = 0;
+        uint256 blockNumber = block.number + 100;
+        console.log("Block Number: ", blockNumber);
+        uint256 nonce = 2;
         uint8 trustScore = 93;
         bytes32 _PERMIT_TYPEHASH = keccak256(
             // ideally we would use spender to garantee the spender is the one signing the message
@@ -97,9 +98,14 @@ contract SwapScript is Script {
                 )
             )
         );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(0xabc123, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            0xff0f5f3e25717074f4465a5b168a59b8df626165558f006031d9131449350775,
+            digest
+        );
         require(
-            vm.addr(0xabc123) == ecrecover(digest, v, r, s),
+            vm.addr(
+                0xff0f5f3e25717074f4465a5b168a59b8df626165558f006031d9131449350775
+            ) == ecrecover(digest, v, r, s),
             "HookVerifyTest: ecrecover failed"
         );
         bytes memory hookData = abi.encode(

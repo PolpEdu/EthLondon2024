@@ -106,6 +106,8 @@ contract HookVerifyTest is Test, Deployers {
                 )
             )
         );
+        console.log("signerPrivateKey: %s", signerPrivateKey);
+
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, digest);
 
         require(

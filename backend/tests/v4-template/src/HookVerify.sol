@@ -17,7 +17,7 @@ contract HookVerify is BaseHook, EIP712, Ownable {
     using PoolIdLibrary for PoolKey;
 
     address private signer =
-        address(0x39e6Db77941463eEA0b323F66509EAdF0bf0bf1b);
+        address(0xc53FA4A20A9476e44937d4bc8c81910546d568e4);
     bytes32 private constant _PERMIT_TYPEHASH =
         keccak256(
             // ideally we would use spender to garantee the spender is the one signing the message
