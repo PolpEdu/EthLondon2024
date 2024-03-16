@@ -1,0 +1,43 @@
+{
+  "name": "@dynamic-labs/next-ethers-wagmi",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@dynamic-labs/ethereum": "*",
+    "@dynamic-labs/ethers-v5": "*",
+    "@dynamic-labs/sdk-react-core": "*",
+    "@dynamic-labs/wagmi-connector": "*",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@types/node": "20.8.7",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.15",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "eslint": "8.51.0",
+    "eslint-config-next": "13.5.6",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.358.0",
+    "next": "13.5.6",
+    "next-auth": "^4.24.7",
+    "next-themes": "^0.3.0",
+    "postcss": "8.4.31",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "sonner": "^1.4.3",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss": "3.3.3",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "5.2.2",
+    "viem": "^1.21.4"
+  }
+}
