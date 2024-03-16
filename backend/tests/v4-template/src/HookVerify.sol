@@ -33,21 +33,13 @@ contract HookVerify is BaseHook, EIP712, Ownable {
     // a single hook contract should be able to service multiple pools
     // ---------------------------------------------------------------
 
-    mapping(PoolId => uint256 count) public beforeSwapCount;
-    mapping(PoolId => uint256 count) public afterSwapCount;
-
-    mapping(PoolId => uint256 count) public beforeAddLiquidityCount;
-    mapping(PoolId => uint256 count) public beforeRemoveLiquidityCount;
-
-    address public _owner = address(0);
-
     function name() external pure returns (string memory) {
         return "HookManager";
     }
 
     constructor(
         IPoolManager _poolManager
-    ) BaseHook(_poolManager) EIP712("HookManager", "1") Ownable(_owner) {}
+    ) BaseHook(_poolManager) EIP712("HookManager", "1") Ownable(signer) {}
 
     function getHookPermissions()
         public
@@ -107,7 +99,7 @@ contract HookVerify is BaseHook, EIP712, Ownable {
         bytes32 r,
         bytes32 s
     ) private {
-        require(block.timestamp <= block_number, "Expired deadline");
+        require(block.number <= block_number, "Expired deadline");
         require(_trustScore >= trustScore, "Invalid trust score");
         bytes32 structHash = getStructHash(
             amount,
