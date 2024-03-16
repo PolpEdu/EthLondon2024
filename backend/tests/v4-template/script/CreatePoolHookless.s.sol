@@ -12,12 +12,15 @@ import {PoolId} from "v4-core/src/types/PoolId.sol";
 contract PoolInitializeExampleInputs is Script {
     using CurrencyLibrary for Currency;
 
-    address constant GOERLI_POOLMANAGER = address(0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b); // pool manager deployed to GOERLI
-    address constant MUNI_ADDRESS = address(0xbD97BF168FA913607b996fab823F88610DCF7737); // mUNI deployed to GOERLI -- insert your own contract address here
-    address constant MUSDC_ADDRESS = address(0xa468864e673a807572598AB6208E49323484c6bF); // mUSDC deployed to GOERLI -- insert your own contract address here
+    address constant SEPOLIA_POOLMANAGER =
+        address(0x64255ed21366DB43d89736EE48928b890A84E2Cb); // pool manager deployed to GOERLI
+    address constant MUNI_ADDRESS =
+        address(0xbD97BF168FA913607b996fab823F88610DCF7737); // mUNI deployed to GOERLI -- insert your own contract address here
+    address constant MUSDC_ADDRESS =
+        address(0xa468864e673a807572598AB6208E49323484c6bF); // mUSDC deployed to GOERLI -- insert your own contract address here
     address constant HOOK_ADDRESS = address(0x0); // hookless pool is 0x0!
 
-    IPoolManager manager = IPoolManager(GOERLI_POOLMANAGER);
+    IPoolManager manager = IPoolManager(SEPOLIA_POOLMANAGER);
 
     event Initialize(
         PoolId indexed id,

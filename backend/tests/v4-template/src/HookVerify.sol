@@ -7,24 +7,26 @@ import {Hooks} from "v4-core/src/libraries/Hooks.sol";
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
-import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "forge-std/console.sol";
 
-contract Counter is BaseHook, EIP712, Ownable {
+contract HookVerify is BaseHook, EIP712, Ownable {
     using PoolIdLibrary for PoolKey;
 
     address private signer =
         address(0x39e6Db77941463eEA0b323F66509EAdF0bf0bf1b);
     bytes32 private constant _PERMIT_TYPEHASH =
-        keccak256("Permit(uint256 blockNumber,uint256 nonce,uint8 trustScore)");
+        keccak256(
+            // ideally we would use spender to garantee the spender is the one signing the message
+            "Permit(int256 amount,uint256 blockNumber,uint256 nonce,uint8 trustScore)"
+        );
 
     event SetSigner(address indexed signer);
     mapping(uint256 => bool) private _nonces;
-    uint8 private trustScore = 0;
+    uint8 private trustScore = 70;
 
     // NOTE: ---------------------------------------------------------
     // state variables should typically be unique to a pool
@@ -74,24 +76,12 @@ contract Counter is BaseHook, EIP712, Ownable {
 
     function beforeSwap(
         address,
-        PoolKey calldata key,
-        IPoolManager.SwapParams calldata,
+        PoolKey calldata,
+        IPoolManager.SwapParams calldata params,
         bytes calldata data
     ) external override returns (bytes4) {
-        beforeSwapCount[key.toId()]++;
-        // decode data
-        /* bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                keccak256(
-                    abi.encode(_PERMIT_TYPEHASH, blockNumber, nonce, trustScore)
-                )
-            )
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, digest); */
-        //  bytes memory data = abi.encode(blockNumber, nonce, trustScore, v, r, s);
-
         (
+            int256 _amount,
             uint256 blockNumber,
             uint256 nonce,
             uint8 _trustScore,
@@ -100,19 +90,16 @@ contract Counter is BaseHook, EIP712, Ownable {
             bytes32 s
         ) = abi.decode(
                 data,
-                (uint256, uint256, uint8, uint8, bytes32, bytes32)
+                (int256, uint256, uint256, uint8, uint8, bytes32, bytes32)
             );
-
-        console.log("blockNumber: %s", blockNumber);
-        console.log("nonce: %s", nonce);
-        console.log("trustScore: %s", _trustScore);
-
-        permit(blockNumber, nonce, _trustScore, v, r, s);
+        require(_amount == params.amountSpecified, "Invalid amount");
+        permit(_amount, blockNumber, nonce, _trustScore, v, r, s);
 
         return BaseHook.beforeSwap.selector;
     }
 
     function permit(
+        int256 amount,
         uint256 block_number,
         uint256 nonce,
         uint8 _trustScore,
@@ -123,6 +110,7 @@ contract Counter is BaseHook, EIP712, Ownable {
         require(block.timestamp <= block_number, "Expired deadline");
         require(_trustScore >= trustScore, "Invalid trust score");
         bytes32 structHash = getStructHash(
+            amount,
             block_number,
             _useNonce(nonce),
             _trustScore
@@ -148,6 +136,7 @@ contract Counter is BaseHook, EIP712, Ownable {
     }
 
     function getStructHash(
+        int256 _amount,
         uint256 _blockNumber,
         uint256 _nonce,
         uint8 _trustScore
@@ -159,6 +148,7 @@ contract Counter is BaseHook, EIP712, Ownable {
                     keccak256(
                         abi.encode(
                             _PERMIT_TYPEHASH,
+                            _amount,
                             _blockNumber,
                             _nonce,
                             _trustScore
