@@ -14,13 +14,14 @@ import "forge-std/console.sol";
 
 contract HookVerifyScript is Script {
     address constant CREATE2_DEPLOYER =
-        address(0x1Dd764Cf61c8e56Ea048374FEcE83fFa40616569); // sepolia create2 deployer
+        address(0x4e59b44847b379578588920cA78FbF26c0B4956C); // sepolia create2 deployer
     address constant SEPOLIA_POOLMANAGER =
-        address(0x64255ed21366DB43d89736EE48928b890A84E2Cb);
+        address(0xd962b16F4ec712D705106674E944B04614F077be);
 
     function setUp() public {}
 
     function run() public {
+        IPoolManager manager = IPoolManager(payable(SEPOLIA_POOLMANAGER));
         // hook contracts must have specific flags encoded in the address
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG);
 
@@ -29,7 +30,7 @@ contract HookVerifyScript is Script {
             CREATE2_DEPLOYER,
             flags,
             type(HookVerify).creationCode,
-            abi.encode(address(SEPOLIA_POOLMANAGER))
+            abi.encode(address(manager))
         );
         console.log("HookVerify address: ", address(hookAddress));
 

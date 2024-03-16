@@ -15,17 +15,17 @@ contract AddLiquidityScript is Script {
     using CurrencyLibrary for Currency;
 
     address constant SEPOLIA_POOLMANAGER =
-        address(0x64255ed21366DB43d89736EE48928b890A84E2Cb); // pool manager deployed to GOERLI
+        address(0xd962b16F4ec712D705106674E944B04614F077be); // pool manager deployed to GOERLI
     address constant MUNI_ADDRESS =
-        address(0xbD97BF168FA913607b996fab823F88610DCF7737); // mUNI deployed to GOERLI -- insert your own contract address here
+        address(0x56ba6046cc51b859DAA4Eb6D445DE99C5b1E4391); // mUNI deployed to GOERLI -- insert your own contract address here
     address constant MUSDC_ADDRESS =
-        address(0xa468864e673a807572598AB6208E49323484c6bF); // mUSDC deployed to GOERLI -- insert your own contract address here
+        address(0x06B2B98dB45481dd0878Bb07979Ba0A79b60A49e); // mUSDC deployed to GOERLI -- insert your own contract address here
     address constant HOOK_ADDRESS =
-        address(0x3CA2cD9f71104a6e1b67822454c725FcaeE35fF6); // address of the hook contract deployed to goerli -- you can use this hook address or deploy your own!
+        address(0x020A5bE4a8BCbd885fEC6122e3beE4e8F3Baaaa2); // address of the hook contract deployed to goerli -- you can use this hook address or deploy your own!
 
     PoolModifyLiquidityTest lpRouter =
         PoolModifyLiquidityTest(
-            address(0x83feDBeD11B3667f40263a88e8435fca51A03F8C)
+            address(0x5bA874E13D2Cf3161F89D1B1d1732D14226dBF16) // POOL MODIFY LIQUITD BASE SEPOLIA
         );
 
     function run() external {
