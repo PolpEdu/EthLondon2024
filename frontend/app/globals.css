@@ -21,8 +21,9 @@ h4{
   @apply text-xl;
 }
 
-h4,h5,h6 {
+h5, h6 {
   @apply font-medium;
+  @apply text-lg;
 }
 
 

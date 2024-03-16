@@ -18,7 +18,7 @@ export default function rateWallet() {
         if (ethAddressRegex.test(walletAddress)) {
             toast("Valid Ethereum address", { description: walletAddress })
             // Add your logic here for a valid Ethereum address
-            router.push(`/${walletAddress.toLowerCase()}`)
+            router.push(`/${walletAddress}`)
         } else {
             toast("Invalid Ethereum address", { description: walletAddress })
             // Handle invalid Ethereum address here, such as showing an error message to the user

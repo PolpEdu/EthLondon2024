@@ -103,7 +103,7 @@ export default function rateWallet({ address }: { address: string }) {
                 justify-start items-center'>
 
                     <Image
-                        src="https://api.cloudnouns.com/v1/pfp"
+                        src=""
                         alt="profile-picture"
                         height={40}
                         width={40}

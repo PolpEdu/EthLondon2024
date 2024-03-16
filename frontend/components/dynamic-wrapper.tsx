@@ -4,7 +4,6 @@ import {
     DynamicContextProvider,
     EthereumWalletConnectors,
     DynamicWagmiConnector,
-    EthersExtension,
 } from "@/lib/dynamic";
 
 export default function ProviderWrapper({ children }: React.PropsWithChildren) {
@@ -25,9 +24,7 @@ export default function ProviderWrapper({ children }: React.PropsWithChildren) {
             settings={{
                 environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID ?? "",
                 walletConnectors: [EthereumWalletConnectors],
-                walletConnectorExtensions: [EthersExtension],
                 cssOverrides: cssOverrides
-
             }}
             
         >
