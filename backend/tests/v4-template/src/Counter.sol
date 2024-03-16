@@ -12,13 +12,14 @@ import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "forge-std/console.sol";
 
 contract Counter is BaseHook, EIP712, Ownable {
     using PoolIdLibrary for PoolKey;
 
     address private signer =
         address(0x39e6Db77941463eEA0b323F66509EAdF0bf0bf1b);
-    bytes32 private constant _PERMIT_WITHDRAW =
+    bytes32 private constant _PERMIT_TYPEHASH =
         keccak256("Permit(uint256 blockNumber,uint256 nonce,uint8 trustScore)");
 
     event SetSigner(address indexed signer);
@@ -72,40 +73,26 @@ contract Counter is BaseHook, EIP712, Ownable {
     // -----------------------------------------------
 
     function beforeSwap(
-        address sender,
+        address,
         PoolKey calldata key,
         IPoolManager.SwapParams calldata,
         bytes calldata data
     ) external override returns (bytes4) {
         beforeSwapCount[key.toId()]++;
-        /*int256 blockNumber = block.number;
-        uint256 nonce = 0;
-        uint8 trustScore = 93;
-        address signer = vm.addr(signerPrivateKey);
-
-        // sign typed data above
-        bytes32 digest = keccak256(
+        // decode data
+        /* bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
                 keccak256(
-                    abi.encode(
-                        keccak256(
-                            "Permit(address owner,uint256 blockNumber,uint256 nonce,uint8 trustScore)"
-                        ),
-                        address(0),
-                        blockNumber,
-                        nonce,
-                        trustScore
-                    )
+                    abi.encode(_PERMIT_TYPEHASH, blockNumber, nonce, trustScore)
                 )
             )
         );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, digest); */
+        //  bytes memory data = abi.encode(blockNumber, nonce, trustScore, v, r, s);
 
-        bytes memory data = abi.encode(blockNumber, nonce, trustScore, v, r, s);*/
-        // decode data
         (
-            uint256 block_number,
+            uint256 blockNumber,
             uint256 nonce,
             uint8 _trustScore,
             uint8 v,
@@ -115,39 +102,44 @@ contract Counter is BaseHook, EIP712, Ownable {
                 data,
                 (uint256, uint256, uint8, uint8, bytes32, bytes32)
             );
-        permit(block_number, nonce, _trustScore, sender, v, r, s);
+
+        console.log("blockNumber: %s", blockNumber);
+        console.log("nonce: %s", nonce);
+        console.log("trustScore: %s", _trustScore);
+
+        permit(blockNumber, nonce, _trustScore, v, r, s);
 
         return BaseHook.beforeSwap.selector;
     }
 
     function afterSwap(
         address,
-        PoolKey calldata key,
+        PoolKey calldata,
         IPoolManager.SwapParams calldata,
         BalanceDelta,
         bytes calldata
     ) external override returns (bytes4) {
-        afterSwapCount[key.toId()]++;
+        // afterSwapCount[key.toId()]++;
         return BaseHook.afterSwap.selector;
     }
 
     function beforeAddLiquidity(
         address,
-        PoolKey calldata key,
+        PoolKey calldata,
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
-        beforeAddLiquidityCount[key.toId()]++;
+        // beforeAddLiquidityCount[key.toId()]++;
         return BaseHook.beforeAddLiquidity.selector;
     }
 
     function beforeRemoveLiquidity(
         address,
-        PoolKey calldata key,
+        PoolKey calldata,
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
-        beforeRemoveLiquidityCount[key.toId()]++;
+        // beforeRemoveLiquidityCount[key.toId()]++;
         return BaseHook.beforeRemoveLiquidity.selector;
     }
 
@@ -155,20 +147,19 @@ contract Counter is BaseHook, EIP712, Ownable {
         uint256 block_number,
         uint256 nonce,
         uint8 _trustScore,
-        address sender,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) private {
         require(block.timestamp <= block_number, "Expired deadline");
         require(_trustScore >= trustScore, "Invalid trust score");
-        bytes32 structHash = keccak256(
-            abi.encode(_PERMIT_WITHDRAW, sender, _useNonce(nonce), block_number)
+        bytes32 structHash = getStructHash(
+            block_number,
+            _useNonce(nonce),
+            _trustScore
         );
 
-        bytes32 hash = _hashTypedDataV4(structHash);
-
-        address _signer = ECDSA.recover(hash, v, r, s);
+        address _signer = ECDSA.recover(structHash, v, r, s);
         require(_signer == signer, "Invalid signature");
     }
 
@@ -185,5 +176,26 @@ contract Counter is BaseHook, EIP712, Ownable {
 
     function setTrustScore(uint8 score) external onlyOwner {
         trustScore = score;
+    }
+
+    function getStructHash(
+        uint256 _blockNumber,
+        uint256 _nonce,
+        uint8 _trustScore
+    ) public pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    keccak256(
+                        abi.encode(
+                            _PERMIT_TYPEHASH,
+                            _blockNumber,
+                            _nonce,
+                            _trustScore
+                        )
+                    )
+                )
+            );
     }
 }
