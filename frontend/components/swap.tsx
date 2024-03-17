@@ -1,12 +1,11 @@
 "use client"
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
     Select,
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
@@ -14,24 +13,35 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FuelIcon } from "lucide-react";
 import TipInfo from "./tool-tip-info";
+import { BLANK_TOKEN, MAX_SQRT_PRICE_LIMIT, MAX_UINT, MIN_SQRT_PRICE_LIMIT, poolSwapTestABI, useErc20Allowance, useErc20Approve, usePoolSwapTestSwap } from "@/utils/utils";
+import { parseEther } from "viem";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { signMessage } from "@/utils/sign";
+import {
+    useAccount,
+    useContractWrite,
+    useWriteContract,
+} from 'wagmi';
 
 const Tokens = [
     {
-        name: "DAI",
-        address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-        image: "",
+        name: "Athoos TOKEN",
+        address: "0x0844B1EC6ee5E2F575Aa55724057721b9cd30e80",
+        image: "https://cryptologos.cc/logos/apecoin-ape-ape-logo.svg",
+    },
+    {
+        name: "ETH",
+        address: "0x0844B1EC6ee5E2F575Aa55724057721b9cd30e80",
+        image: "https://app.dynamic.xyz/assets/networks/eth.svg",
     },
     {
         name: "USDC",
-        address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        image: "",
-    },
-    {
-        name: "USDT",
-        address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        image: "",
+        address: "0x19544eafF5959f228D2d76dF1570B220121518A8",
+        image: "https://cryptologos.cc/logos/usd-coin-usdc-logo.svg",
     },
 ];
+
+const swapRouterAddress = "0xd962b16F4ec712D705106674E944B04614F077be";
 
 function TokenInput({ message, tokens }: { message: string, tokens: { name: string, address: string, image: string }[] }) {
     return (
@@ -49,7 +59,7 @@ function TokenInput({ message, tokens }: { message: string, tokens: { name: stri
                 />
                 <Select >
                     <SelectTrigger className="border-blue-600">
-                        <SelectValue placeholder="Token" />
+                        <SelectValue placeholder="Select token" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup className="gap-6">
@@ -58,15 +68,16 @@ function TokenInput({ message, tokens }: { message: string, tokens: { name: stri
                                     <SelectItem
                                         value={token.name}
                                         key={index}
-                                        className="w-full flex flex-row gap-2 justify-center items-center"
                                     >
-                                        <Image
-                                            src={token.image}
-                                            alt="token-image"
-                                            height={50}
-                                            width={50}
-                                        />
-                                        {token.name}
+                                        <div className="flex flex-row gap-2 items-center">
+                                            <Image
+                                                src={token.image}
+                                                alt="token-image"
+                                                height={35}
+                                                width={35}
+                                            />
+                                            <div>{token.name}</div>
+                                        </div>
                                     </SelectItem>
                                 );
 
@@ -84,17 +95,91 @@ function TokenInput({ message, tokens }: { message: string, tokens: { name: stri
 }
 
 export default function Swap() {
-    const [progress, setProgress] = React.useState(90);
+    const [progress, setProgress] = useState(90);
+    //swap status
+    const [isSwapping, setIsSwapping] = useState(false);
+    const [swapError, setSwapError] = useState("");
+    const [swapSuccess, setSwapSuccess] = useState(false);
 
-
-    // const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     // Update the progress state with the new value from the slider
-    //     setProgress(parseInt(event.target.value, 10));
-    // };
+    const [fromCurrency, setFromCurrency] = useState('0x0844B1EC6ee5E2F575Aa55724057721b9cd30e80');
+    const [toCurrency, setToCurrency] = useState('0x19544eafF5959f228D2d76dF1570B220121518A8');
+    const [fromAmount, setFromAmount] = useState("");
 
     const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setProgress(parseInt(event.target.value, 10));
     };
+
+    const { address } = useAccount();
+
+    const fromTokenAllowance = useErc20Allowance({
+        address: fromCurrency,
+        args: [address ?? "0x0", swapRouterAddress],
+    });
+
+    const tokenApprove = useErc20Approve({
+        address: fromCurrency,
+        args: [swapRouterAddress, MAX_UINT],
+    });
+    const [swapFee, setSwapFee] = useState(3000);
+    const [tickSpacing, setTickSpacing] = useState(60);
+    const [hookData, setHookData] = useState<string>(""); // New state for custom hook data
+    const [hookAddress, setHookAddress] = useState<`0x${string}`>(
+        '0x020664b9f354c415a7D01dAa483CF78aFe02F66E'
+    );
+
+    const { config } = useWriteContract({
+        args: [
+            {
+                currency0: fromCurrency.toLowerCase() < toCurrency.toLowerCase() ? fromCurrency : toCurrency,
+                currency1: fromCurrency.toLowerCase() < toCurrency.toLowerCase() ? toCurrency : fromCurrency,
+                fee: Number(swapFee),
+                tickSpacing: Number(tickSpacing),
+                hooks: hookAddress,
+            },
+            {
+                zeroForOne: fromCurrency.toLowerCase() < toCurrency.toLowerCase(),
+                amountSpecified: parseEther("50"),
+                sqrtPriceLimitX96:
+                    fromCurrency.toLowerCase() < toCurrency.toLowerCase() ? MIN_SQRT_PRICE_LIMIT : MAX_SQRT_PRICE_LIMIT, // unlimited impact
+            },
+            {
+                withdrawTokens: true,
+                settleUsingTransfer: true,
+                currencyAlreadySent: false
+            },
+            hookData as `0x${string}`,
+        ],
+        address: '0x60AbEb98b3b95A0c5786261c1Ab830e3D2383F9e' as `0x${string}`,
+        abi: poolSwapTestABI,
+        functionName: 'swap',
+    });
+    const { data, write } = useContractWrite(config);
+
+
+    const handleSwap = async () => {
+        setIsSwapping(true);
+        setSwapError("");
+        setSwapSuccess(false);
+        const hookdata = await signMessage(50);
+
+        setHookData(hookdata);
+        write();
+    };
+
+    const { walletConnector } = useDynamicContext();
+
+    async function switchnetwork() {
+        if (!walletConnector) {
+            console.error("Wallet connector not found");
+            return;
+        }
+        if (walletConnector.supportsNetworkSwitching()) {
+            await walletConnector.switchNetwork({ networkChainId: 137 });
+            console.log("Success! Network switched");
+        }
+    }
+
+
 
     return (
         <form className="h-fit w-[30rem]
@@ -158,6 +243,7 @@ export default function Swap() {
                 type="submit"
                 className="w-full bg-blue-600 text-white
                 font-medium text-xl"
+                onClick={handleSwap}
             >
                 Swap tokens
             </Button>
