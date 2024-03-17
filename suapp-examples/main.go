@@ -69,33 +69,19 @@ func deploySuaveContract(privKey *framework.PrivKey) (common.Address, common.Has
 	_ = contractAddr.SendConfidentialRequest("updateApiKey", nil, []byte(SCAN_KEY))
 
 	// //Call signL1MintApproval and compare signatures
-	// receipt := contractAddr.SendConfidentialRequest("signL1SwapApproval", []any{big.NewInt(0), big.NewInt(9430107)}, nil)
+	receipt := contractAddr.SendConfidentialRequest("signL1SwapApproval", []any{big.NewInt(0), big.NewInt(9430107)}, nil)
 
-	// // Extract the signature from SUAVE transaction logs
-	// var signature []byte
-	// if len(receipt.Logs) > 0 {
-	// 	nfteeApprovalEvent := &NFTEEApproval{}
-	// 	if err := nfteeApprovalEvent.Unpack(receipt.Logs[0]); err != nil {
-	// 		log.Fatalf("Error unpacking logs: %v", err)
-	// 	}
-	// 	signature = nfteeApprovalEvent.SignedMessage
-	// }
-
-	//address_string := "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC"
-	//conver to address
-	//address := common.HexToAddress(address_string)
-	//transform scan key to bytes
-
-	receipt := contractAddr.SendConfidentialRequest("checkTrust", []any{addr, []byte(SCAN_KEY)}, nil)
+	// Extract the signature from SUAVE transaction logs
+	var signature []byte
 	if len(receipt.Logs) > 0 {
-		responseEvent := &NFTEEApproval{}
-		if err := responseEvent.Unpack(receipt.Logs[0]); err != nil {
+		nfteeApprovalEvent := &NFTEEApproval{}
+		if err := nfteeApprovalEvent.Unpack(receipt.Logs[0]); err != nil {
 			log.Fatalf("Error unpacking logs: %v", err)
 		}
-		fmt.Printf("Response: %s\n", responseEvent.SignedMessage)
+		signature = nfteeApprovalEvent.SignedMessage
 	}
 
-	return contractAddr.Raw().Address(), receipt.TxHash, []byte{}
+	return contractAddr.Raw().Address(), receipt.TxHash, signature
 }
 
 // NFTEEApprovalEventABI is the ABI of the NFTEEApproval event.
