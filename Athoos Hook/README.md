@@ -12,7 +12,7 @@
 Deployed on [Base Sepolia Testnet](https://sepolia.base.org) using the following addresses:
 
 <details>
-    ```bash
+
         CREATE2_DEPLOYER: 0x4e59b44847b379578588920cA78FbF26c0B4956C
         Athoos BUCK deployed to 0x19544eafF5959f228D2d76dF1570B220121518A8
         Athoos USD deployed to 0x0844B1EC6ee5E2F575Aa55724057721b9cd30e80
@@ -22,7 +22,6 @@ Deployed on [Base Sepolia Testnet](https://sepolia.base.org) using the following
         PoolManager deployed to 0xd962b16F4ec712D705106674E944B04614F077be
         PoolModifyLiquidityTest deployed to 0x5bA874E13D2Cf3161F89D1B1d1732D14226dBF16
         PoolSwapTest deployed to 0x60AbEb98b3b95A0c5786261c1Ab830e3D2383F9e
-    ```
 
 </details>
 
