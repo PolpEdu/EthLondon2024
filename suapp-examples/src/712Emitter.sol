@@ -15,6 +15,7 @@ contract Emitter {
     // Private key variable
     Suave.DataId public privateKeyDataID;
     Suave.DataId public apiKeyDataID;
+    Suave.DataId public gptKeyID;
     address public owner;
 
     // Constructor to initialize owner
@@ -72,7 +73,7 @@ contract Emitter {
     }
 
     function setGPTKey(Suave.DataId dataID) public {
-        gptstoreKey = dataID;
+        gptKeyID = dataID;
     }
 
     function updateGPTKey() public returns (bytes memory) {
