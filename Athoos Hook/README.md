@@ -1,6 +1,6 @@
 # ETHLondon2024 - Athoos
 
-## **This Repo implements a EIP712 version of a Uniswap v4 Hook (16/03/2024) 🦄**
+## **This Repo implements a Trust Wallet Credit in a Uniswap v4 Hook (16/03/2024) 🦄**
 
 ### **Forked from the [v4-template](https://github.com/uniswapfoundation/v4-template)**
 

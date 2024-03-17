@@ -88,9 +88,9 @@ export default function rateWallet({ address }: { address: string }) {
                 <Image
                     src={props.image}
                     alt="rating-picture"
-                    height={200}
-                    width={200}
-                    className='object-center h-36'
+                    height={130}
+                    width={120}
+                    className='object-center h-24'
                 />
 
                 <RadialProgressBar className='absolute object-center' progress={progress} fill={props.fill} />

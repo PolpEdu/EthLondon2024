@@ -16,7 +16,7 @@ contract HookVerifyScript is Script {
     address constant CREATE2_DEPLOYER =
         address(0x4e59b44847b379578588920cA78FbF26c0B4956C); // sepolia create2 deployer
     address constant SEPOLIA_POOLMANAGER =
-        address(0xd962b16F4ec712D705106674E944B04614F077be);
+        address(0xd962b16F4ec712D705106674E944B04614F077be); // using Sepolia Pool Manager from Sepolia Base
 
     function setUp() public {}
 

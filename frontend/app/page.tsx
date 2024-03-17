@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import RateWallet from "@/components/rate-wallet";
-import hero from "@/images/hero.svg";
+import hero from "@/images/hero.gif";
 
 
 export default function Home() {

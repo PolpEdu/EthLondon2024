@@ -41,7 +41,7 @@ export default function Navbar() {
                     }
                 })}
             </ul>
-            <DynamicWidget variant='dropdown'/>
+            <DynamicWidget variant='dropdown' />
         </nav>
     )
 }
