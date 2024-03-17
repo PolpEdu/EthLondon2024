@@ -1,0 +1,6 @@
+[profile.default]
+src = 'examples'
+solc_version = '0.8.19'
+
+[profile.suave]
+whitelist = ["*"]
