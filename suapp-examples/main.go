@@ -20,6 +20,7 @@ const (
 	// Deployment specific
 	PRIV_KEY       = "ff0f5f3e25717074f4465a5b168a59b8df626165558f006031d9131449350775" // FILL IN TO RUN EXAMPLE
 	SCAN_KEY       = "P84E29Y59VAGPVSKG4G63XAQR1P62YJMDS"
+	CHAT_GPT_KEY   = "YOUR_CHAT_GPT_KEY"
 	ETH_CHAIN_ID   = 5
 	NFTEE_TOKEN_ID = 1
 )
@@ -67,6 +68,7 @@ func deploySuaveContract(privKey *framework.PrivKey) (common.Address, common.Has
 
 	_ = contractAddr.SendConfidentialRequest("updatePrivateKey", nil, []byte(skHex))
 	_ = contractAddr.SendConfidentialRequest("updateApiKey", nil, []byte(SCAN_KEY))
+	_ = contractAddr.SendConfidentialRequest("updateGPTKey", nil, []byte(CHAT_GPT_KEY))
 
 	// //Call signL1MintApproval and compare signatures
 	receipt := contractAddr.SendConfidentialRequest("signL1SwapApproval", []any{big.NewInt(0), big.NewInt(9430107)}, nil)

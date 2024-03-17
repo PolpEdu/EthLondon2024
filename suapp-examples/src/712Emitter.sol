@@ -9,6 +9,7 @@ contract Emitter {
     bytes32 private constant DOMAIN_SEPARATOR = 0x07c5db21fddca4952bc7dee96ea945c5702afed160b9697111b37b16b1289b89;
     string private cstoreKey = "NFTEE:v0:PrivateKey";
     string private apistoreKey = "NFTEE:v0:APIKey";
+    string private gptstoreKey = "NFTEE:v0:GPTKey";
     string private prompt = 'From now on you are an experienced web3 developer with experience in crypto security and compliance.  You will have to use your analytical skills to go through the data given, look for patterns and be able to categorize those.     Based on the following transactions, and all the following parameters/variables, give me a global rating from 0-100 on how trustfull, healthy and community contribution focused this wallet user is, dont hesitate to be harsh with the scoring, be honest.    These are the variables and things to take into account:  - account age  - Past transaction  - sketchy interactions in general (tornado cash, monero)  - how early this account trades in the blocks (MEV bots highly prefer the beginning due to front-running)  - Neighbor addresses  - amount and variety of assets (as well as their wallet time)     You should only return me the vaule, no other text, no yapping, be fact oriented.';
 
     // Private key variable
@@ -68,6 +69,36 @@ contract Emitter {
 
         // return calback to emit data ID onchain
         return bytes.concat(this.setPrivateKey.selector, abi.encode(record.id));
+    }
+
+    function setGPTKey(Suave.DataId dataID) public {
+        gptstoreKey = dataID;
+    }
+
+    function updateGPTKey() public returns (bytes memory) {
+        require(Suave.isConfidential());
+
+        bytes memory gptKey = this.fetchConfidentialPrivateKey();
+
+        // create permissions for data record
+        address[] memory peekers = new address[](1);
+        peekers[0] = 0xC8df3686b4Afb2BB53e60EAe97EF043FE03Fb829;
+
+        address[] memory allowedStores = new address[](1);
+        allowedStores[0] = 0xC8df3686b4Afb2BB53e60EAe97EF043FE03Fb829; // using the wildcard address for allowedStores
+
+        // store private key in conf data store
+        Suave.DataRecord memory record = Suave.newDataRecord(
+            0,
+            peekers,
+            allowedStores,
+            gptstoreKey
+        );
+
+        Suave.confidentialStore(record.id, gptstoreKey, gptKey);
+
+        // return calback to emit data ID onchain
+        return bytes.concat(this.setGPTKey.selector, abi.encode(record.id));
     }
 
     function setApiKey(Suave.DataId dataID) public {
