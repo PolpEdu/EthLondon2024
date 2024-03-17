@@ -1,6 +1,7 @@
 import {Suave} from "suave-std/suavelib/Suave.sol";
 import "forge-std/console.sol";
 import "solady/utils/LibString.sol";
+import {ChatGPT} from "../lib/suave-std/src/protocols/ChatGPT.sol";
 
 
 contract Emitter {
@@ -8,6 +9,7 @@ contract Emitter {
     bytes32 private constant DOMAIN_SEPARATOR = 0x07c5db21fddca4952bc7dee96ea945c5702afed160b9697111b37b16b1289b89;
     string private cstoreKey = "NFTEE:v0:PrivateKey";
     string private apistoreKey = "NFTEE:v0:APIKey";
+    string private prompt = 'From now on you are an experienced web3 developer with experience in crypto security and compliance.  You will have to use your analytical skills to go through the data given, look for patterns and be able to categorize those.     Based on the following transactions, and all the following parameters/variables, give me a global rating from 0-100 on how trustfull, healthy and community contribution focused this wallet user is, dont hesitate to be harsh with the scoring, be honest.    These are the variables and things to take into account:  - account age  - Past transaction  - sketchy interactions in general (tornado cash, monero)  - how early this account trades in the blocks (MEV bots highly prefer the beginning due to front-running)  - Neighbor addresses  - amount and variety of assets (as well as their wallet time)     You should only return me the vaule, no other text, no yapping, be fact oriented.';
 
     // Private key variable
     Suave.DataId public privateKeyDataID;
@@ -110,15 +112,8 @@ contract Emitter {
         emit TrustCheck(trustScore);
     }   
 
-    function checkTrust(address account) public returns (uint8) {
-        require(Suave.isConfidential());
-        require(
-            Suave.DataId.unwrap(apiKeyDataID) != bytes16(0),
-            "private key is not set"
-        );
-
-        bytes memory apiKey = Suave.confidentialRetrieve(apiKeyDataID, apistoreKey);
-
+    function checkTrust(address account, bytes memory apiKey) public returns (bytes memory) {
+    
         //format string
         string memory url = string(abi.encodePacked("https://api-sepolia.basescan.org/api?module=account&action=txlist&address=", LibString.toHexStringChecksummed(account), "&startblock=0&endblock=latest&page=1&offset=2&sort=asc&apikey=", apiKey));
 
@@ -138,7 +133,17 @@ contract Emitter {
         console.log("-- response --");
         console.log(string(response));
 
-        return 90;
+
+        //we must do a algorithms to check the trust score
+        //but for poc purpose we will resort to ChatGPT to generate a trust score
+        ChatGPT.Message[] memory messages = new ChatGPT.Message[](1);
+        messages[0].role = ChatGPT.Role.System;
+        messages[0].content = string(abi.encodePacked(prompt, response));
+        ChatGPT chatGPT = new ChatGPT(string(apiKey));
+        string memory result = chatGPT.complete(messages);
+
+
+        return abi.encodePacked(result);
     }
 
     
@@ -156,8 +161,9 @@ contract Emitter {
 
         //fetch api key
         //recover uint8 from bytes concat
+        bytes memory apiKey = Suave.confidentialRetrieve(apiKeyDataID, apistoreKey);
 
-        uint8 trustScore = checkTrust(msg.sender);
+        bytes memory trustScore = checkTrust(msg.sender, apiKey);
         
 
         bytes memory digest = abi.encodePacked(

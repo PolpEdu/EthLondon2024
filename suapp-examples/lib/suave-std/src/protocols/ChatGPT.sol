@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "src/suavelib/Suave.sol";
-import "solady/src/utils/JSONParserLib.sol";
+import "../../lib/solady/src/utils/JSONParserLib.sol";
 
 contract ChatGPT {
     using JSONParserLib for *;
